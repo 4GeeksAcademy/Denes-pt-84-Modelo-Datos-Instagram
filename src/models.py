@@ -8,22 +8,42 @@ from eralchemy2 import render_er
 Base = declarative_base()
 
 class Person(Base):
-    __tablename__ = 'person'
+    __tablename__ = 'user'
     # Here we define columns for the table person
     # Notice that each column is also a normal Python instance attribute.
     id = Column(Integer, primary_key=True)
-    name = Column(String(250), nullable=False)
+    name = Column(String(250), nullable=False) #nullable=false, al estar falso quiere decir que no puede quedar vacio
+    last_name = Column(String(250))
+    email = Column(String(50), nullable=False, unique=True)# unique=True quiere decir que es unico y no se puede repetir en la tabla
+    comentario = relationship('Coments', back_populates='person')
+    publicacion = relationship('Post', back_populates = 'Person')
 
-class Address(Base):
-    __tablename__ = 'address'
+class Coments(Base):
+    __tablename__ = 'comentario'
     # Here we define columns for the table address.
     # Notice that each column is also a normal Python instance attribute.
     id = Column(Integer, primary_key=True)
-    street_name = Column(String(250))
-    street_number = Column(String(250))
-    post_code = Column(String(250), nullable=False)
-    person_id = Column(Integer, ForeignKey('person.id'))
-    person = relationship(Person)
+    text = Column(String)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    person = relationship('Person', back_populates ='comentario')
+    publicacion = relationship('Post', back_populates = 'comentario')
+
+class Post(Base): 
+    __tablename__= 'publicacion'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    comentario = relationship('Coments', back_populates = 'publicacion')
+    person = relationship('Person', back_populates ='publicacion')
+    multimedia= relationship('Media', back_populates = 'publicacion')
+    
+class Media(Base): 
+    __tablename__= 'multimedia'
+    id = Column(Integer, primary_key=True)
+    type = Column(String)
+    url = Column(String)
+    post_id = Column(Integer, ForeignKey('publicacion.id'))
+    publicacion = relationship('Post', back_populates = 'multimedia')
+
 
     def to_dict(self):
         return {}
